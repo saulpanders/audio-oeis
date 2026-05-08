@@ -1,5 +1,16 @@
 // Update this after deploying the Cloudflare Worker (see README):
-const PROXY_BASE = 'https://YOUR-WORKER.workers.dev?id=';
+const WORKER_BASE = 'https://YOUR-WORKER.workers.dev?id=';
+
+// On localhost, route through a public CORS proxy so you can test without the Worker deployed.
+const IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+
+function proxyUrl(oeisId) {
+  if (IS_LOCAL) {
+    const target = `https://oeis.org/search?q=id:${oeisId}&fmt=json`;
+    return `https://corsproxy.io/?url=${encodeURIComponent(target)}`;
+  }
+  return WORKER_BASE + oeisId;
+}
 
 // --- Constants ---
 
@@ -58,7 +69,7 @@ function noteDuration() {
 async function fetchOEIS(oeisId) {
   if (!/^A\d{1,6}$/i.test(oeisId)) throw new Error('ID must be A followed by up to 6 digits');
   const id = oeisId.toUpperCase();
-  const resp = await fetch(PROXY_BASE + id, { signal: AbortSignal.timeout(10000) });
+  const resp = await fetch(proxyUrl(id), { signal: AbortSignal.timeout(10000) });
   if (!resp.ok) throw new Error('HTTP ' + resp.status);
   const json = await resp.json();
   if (!json.results || json.results.length === 0) throw new Error('Sequence not found');
