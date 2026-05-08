@@ -64,11 +64,31 @@ function noteDuration() {
 
 // --- OEIS fetch ---
 
+// AbortSignal.timeout() isn't in Safari < 15.4 or Firefox < 100;
+// passing a reason to abort() also isn't universal, so keep it simple.
+function fetchWithTimeout(url, ms) {
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), ms);
+  return fetch(url, { signal: ctrl.signal }).finally(() => clearTimeout(timer));
+}
+
 async function fetchOEIS(oeisId) {
   if (!/^A\d{1,6}$/i.test(oeisId)) throw new Error('ID must be A followed by up to 6 digits');
   const id = oeisId.toUpperCase();
-  const resp = await fetch(proxyUrl(id), { signal: AbortSignal.timeout(10000) });
-  if (!resp.ok) throw new Error('HTTP ' + resp.status);
+  let resp;
+  try {
+    resp = await fetchWithTimeout(proxyUrl(id), 10000);
+  } catch (err) {
+    if (err.name === 'AbortError') throw new Error('Request timed out');
+    if (IS_LOCAL) throw new Error('Proxy unreachable — run: python proxy.py');
+    throw new Error('Network error: ' + (err.message || err));
+  }
+  if (!resp.ok) {
+    if (resp.status === 404 && IS_LOCAL) {
+      throw new Error('Got 404 — use proxy.py, not python -m http.server');
+    }
+    throw new Error('HTTP ' + resp.status);
+  }
   const json = await resp.json();
   if (!json.results || json.results.length === 0) throw new Error('Sequence not found');
   const r = json.results[0];
@@ -166,7 +186,8 @@ function writeStr(view, offset, str) {
 
 function initAudio() {
   if (AppState.audioCtx) return;
-  AppState.audioCtx = new AudioContext();
+  const Ctx = window.AudioContext || window.webkitAudioContext;
+  AppState.audioCtx = new Ctx();
   AppState.masterGain = AppState.audioCtx.createGain();
   AppState.masterGain.gain.value = 0.8;
   AppState.masterGain.connect(AppState.audioCtx.destination);
@@ -268,8 +289,9 @@ function updateTransportUI() {
 // --- Export ---
 
 async function renderOffline(totalSecs) {
-  const sr = 44100;
-  const offCtx = new OfflineAudioContext(2, Math.ceil(totalSecs * sr), sr);
+  const sr = AppState.audioCtx ? AppState.audioCtx.sampleRate : 44100;
+  const OfflineCtx = window.OfflineAudioContext || window.webkitOfflineAudioContext;
+  const offCtx = new OfflineCtx(2, Math.ceil(totalSecs * sr), sr);
 
   const master = offCtx.createGain();
   master.gain.value = 0.8;
