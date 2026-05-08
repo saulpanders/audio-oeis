@@ -90,8 +90,10 @@ async function fetchOEIS(oeisId) {
     throw new Error('HTTP ' + resp.status);
   }
   const json = await resp.json();
-  if (!json.results || json.results.length === 0) throw new Error('Sequence not found');
-  const r = json.results[0];
+  // OEIS now returns a bare array; older API returned { results: [...] }
+  const results = Array.isArray(json) ? json : (json.results || []);
+  if (results.length === 0) throw new Error('Sequence not found');
+  const r = results[0];
   const terms = r.data.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
   return { name: r.name, terms };
 }
