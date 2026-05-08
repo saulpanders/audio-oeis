@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; connect-src 'self' https://*.workers.dev; media-src blob:; object-src 'none';">
+  <title>OEIS Audio Sequencer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"
+          integrity="sha384-xuasJXVcyv3hZq0eYpelEkBC8l4yufatZXDsKuyCU2rqfhDCb+ftuE/mSfZAteiK"
+          crossorigin="anonymous"></script>
+  <script src="app.js" defer></script>
+</head>
+<body>
+
+<header id="transport">
+  <span id="app-title">OEIS Sequencer</span>
+  <button id="btn-play" type="button">&#9654; Play</button>
+  <button id="btn-stop" type="button" disabled>&#9632; Stop</button>
+  <label><input type="checkbox" id="chk-loop" checked> Loop</label>
+  <label>BPM <input type="number" id="inp-bpm" value="120" min="20" max="300" step="1"></label>
+  <label>Bars <input type="number" id="inp-export-bars" value="8" min="1" max="64" step="1"></label>
+  <button id="btn-export-wav" type="button">Export WAV</button>
+  <button id="btn-export-mp3" type="button">Export MP3</button>
+  <span id="export-status"></span>
+</header>
+
+<main id="track-list"></main>
+
+<button id="btn-add-track" type="button">+ Add Track</button>
+
+<template id="track-template">
+  <article class="track-card">
+    <div class="track-header">
+      <span class="track-title">New Track</span>
+      <div class="track-actions">
+        <button class="btn-mute" type="button">Mute</button>
+        <button class="btn-delete" type="button">Delete</button>
+      </div>
+    </div>
+    <div class="track-controls">
+      <div class="control-group">
+        <label>OEIS ID <input class="inp-oeis-id" type="text" placeholder="A000045" maxlength="8" spellcheck="false"></label>
+        <button class="btn-fetch" type="button">Fetch</button>
+      </div>
+      <div class="control-group">
+        <label>Mode
+          <select class="sel-mode">
+            <option value="midi">MIDI</option>
+            <option value="diatonic">Diatonic</option>
+            <option value="microtonal">Microtonal</option>
+          </select>
+        </label>
+        <label>Wave
+          <select class="sel-wave">
+            <option value="sine">Sine</option>
+            <option value="triangle">Triangle</option>
+            <option value="sawtooth">Sawtooth</option>
+            <option value="square">Square</option>
+          </select>
+        </label>
+        <label>Vol <input class="inp-vol" type="range" min="0" max="1" step="0.01" value="0.7"></label>
+      </div>
+      <div class="control-group root-group hidden">
+        <label>Root <select class="sel-root"></select></label>
+        <label>Scale <select class="sel-scale"></select></label>
+      </div>
+    </div>
+    <div class="track-preview">
+      <span class="lbl-terms"></span>
+    </div>
+    <div class="track-status"></div>
+  </article>
+</template>
+
+</body>
+</html>

@@ -1,0 +1,197 @@
+:root {
+  --bg: #111118;
+  --surface: #1a1a28;
+  --surface2: #22223a;
+  --text: #d8d8e8;
+  --text-dim: #666680;
+  --accent: #7c6cff;
+  --border: #2a2a40;
+  --error: #e05a5a;
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'Courier New', 'Menlo', monospace;
+  font-size: 12px;
+  min-height: 100vh;
+}
+
+#transport {
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  border-bottom: 1px solid var(--border);
+  padding: 8px 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+  z-index: 100;
+}
+
+#app-title {
+  font-size: 13px;
+  font-weight: bold;
+  color: var(--accent);
+  letter-spacing: 0.05em;
+  margin-right: 6px;
+}
+
+button {
+  background: var(--surface2);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 4px 10px;
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 11px;
+  transition: background 0.1s;
+  white-space: nowrap;
+}
+
+button:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: var(--accent);
+}
+
+button:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+input[type="number"],
+input[type="text"] {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 3px 6px;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+input[type="number"] { width: 52px; }
+input[type="text"] { width: 78px; }
+
+select {
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  padding: 3px 4px;
+  font-family: inherit;
+  font-size: 11px;
+}
+
+label {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  color: var(--text-dim);
+}
+
+input[type="range"] {
+  width: 72px;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+input[type="checkbox"] {
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+#export-status {
+  color: var(--text-dim);
+  font-size: 10px;
+}
+
+#track-list {
+  padding: 14px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.track-card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--track-color, var(--accent));
+  padding: 10px 12px;
+  transition: opacity 0.15s;
+}
+
+.track-card.muted {
+  opacity: 0.45;
+}
+
+.track-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+  gap: 8px;
+}
+
+.track-title {
+  font-size: 11px;
+  color: var(--track-color, var(--accent));
+  font-weight: bold;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.track-actions {
+  display: flex;
+  gap: 5px;
+  flex-shrink: 0;
+}
+
+.track-controls {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.control-group {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.track-preview {
+  margin-top: 7px;
+  color: var(--text-dim);
+  font-size: 10px;
+  min-height: 14px;
+  letter-spacing: 0.02em;
+}
+
+.track-status {
+  margin-top: 3px;
+  font-size: 10px;
+  color: var(--text-dim);
+  min-height: 14px;
+}
+
+.track-status.error {
+  color: var(--error);
+}
+
+.hidden {
+  display: none !important;
+}
+
+#btn-add-track {
+  display: block;
+  margin: 4px 16px 24px;
+  padding: 7px 14px;
+}
