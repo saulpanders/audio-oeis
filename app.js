@@ -1,14 +1,12 @@
 // Update this after deploying the Cloudflare Worker (see README):
 const WORKER_BASE = 'https://YOUR-WORKER.workers.dev?id=';
 
-// On localhost, route through a public CORS proxy so you can test without the Worker deployed.
-const IS_LOCAL = ['localhost', '127.0.0.1', ''].includes(window.location.hostname);
+// On localhost, proxy.py serves /api/oeis so the browser never touches OEIS directly.
+// On file://, fetching is not possible — open via http://localhost:8080 instead.
+const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 function proxyUrl(oeisId) {
-  if (IS_LOCAL) {
-    const target = `https://oeis.org/search?q=id:${oeisId}&fmt=json`;
-    return `https://corsproxy.io/?url=${encodeURIComponent(target)}`;
-  }
+  if (IS_LOCAL) return `/api/oeis?id=${oeisId}`;
   return WORKER_BASE + oeisId;
 }
 
@@ -218,9 +216,9 @@ function scheduler() {
   }
 }
 
-function play() {
+async function play() {
   initAudio();
-  AppState.audioCtx.resume();
+  await AppState.audioCtx.resume();  // must await — Chrome starts AudioContext suspended
   for (const track of AppState.tracks) {
     track.noteIndex = 0;
     if (!track.gainNode) {
@@ -233,6 +231,7 @@ function play() {
   AppState.masterGain.gain.value = 0.8;
   AppState.nextNoteTime = AppState.audioCtx.currentTime + 0.05;
   AppState.isPlaying = true;
+  scheduler();  // schedule first batch now; setInterval alone would fire 100ms late
   AppState.schedulerTimer = setInterval(scheduler, LOOKAHEAD_MS);
   updateTransportUI();
 }
@@ -362,7 +361,7 @@ function createTrack() {
     oeisId:      '',
     name:        '',
     terms:       [],
-    mappingMode: 'midi',
+    mappingMode: 'diatonic',
     rootNote:    60,
     scale:       SCALES.major,
     waveform:    'sine',
@@ -399,6 +398,10 @@ function renderTrackCard(track) {
     opt.textContent = name.charAt(0).toUpperCase() + name.slice(1);
     selScale.appendChild(opt);
   }
+
+  // Sync dropdown and visibility to initial track state
+  card.querySelector('.sel-mode').value = track.mappingMode;
+  card.querySelector('.root-group').classList.toggle('hidden', track.mappingMode !== 'diatonic');
 
   const oeisInput = card.querySelector('.inp-oeis-id');
   oeisInput.addEventListener('input', e => {
@@ -501,5 +504,8 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('btn-add-track').addEventListener('click', createTrack);
 
   updateTransportUI();
-  createTrack();
+  const firstTrack = createTrack();
+  // Pre-populate so the user can click Fetch immediately without typing
+  const firstCard = document.querySelector('.track-card');
+  if (firstCard) firstCard.querySelector('.inp-oeis-id').value = 'A000045';
 });
