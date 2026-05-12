@@ -1,5 +1,5 @@
 export default {
-  async fetch(request) {
+  async fetch(request, env) {
     if (request.method === 'OPTIONS') {
       return new Response(null, {
         headers: {
@@ -19,10 +19,7 @@ export default {
     }
 
     try {
-      const resp = await fetch(
-        `https://oeis.org/search?q=id:${id}&fmt=json`,
-        { signal: AbortSignal.timeout(10000) }
-      );
+      const resp = await fetchOEIS(id);
       const body = await resp.text();
       return new Response(body, {
         status: resp.status,
@@ -39,4 +36,32 @@ export default {
       });
     }
   },
+
+  async scheduled(event, env) {
+    try {
+      const resp = await fetchOEIS('A000045');
+      if (!resp.ok) throw new Error('HTTP ' + resp.status);
+      const json = await resp.json();
+      const results = Array.isArray(json) ? json : (json.results || []);
+      if (results.length === 0) throw new Error('empty response from OEIS');
+    } catch (err) {
+      await sendAlert(env, `OEIS proxy health check failed: ${err.message}`);
+    }
+  },
 };
+
+function fetchOEIS(id) {
+  return fetch(
+    `https://oeis.org/search?q=id:${id}&fmt=json`,
+    { signal: AbortSignal.timeout(10000) }
+  );
+}
+
+async function sendAlert(env, message) {
+  if (!env.WEBHOOK_URL) return;
+  await fetch(env.WEBHOOK_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ content: message }),
+  }).catch(() => {});
+}

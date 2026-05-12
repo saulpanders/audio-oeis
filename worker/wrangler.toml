@@ -1,0 +1,11 @@
+name = "oeis-proxy"
+main = "oeis-proxy.js"
+compatibility_date = "2024-09-02"
+
+[triggers]
+crons = ["*/5 * * * *"]
+
+# Set WEBHOOK_URL via: wrangler secret put WEBHOOK_URL
+# Paste your Discord or Slack webhook URL when prompted.
+# Discord:  Server Settings → Integrations → Webhooks → New Webhook → Copy URL
+# Slack:    api.slack.com/apps → Incoming Webhooks → Add New Webhook

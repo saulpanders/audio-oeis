@@ -16,7 +16,7 @@ import urllib.error
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 from urllib.parse import urlparse, parse_qs
 
-PORT = 8080
+PORT = 8000
 NO_VERIFY = '--no-verify' in sys.argv
 
 

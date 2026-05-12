@@ -4,31 +4,69 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' https://cdn.jsdelivr.net; style-src 'self'; connect-src 'self' https://*.workers.dev; media-src blob:; object-src 'none';">
+        content="default-src 'self'; script-src 'self' https://static.cloudflareinsights.com; style-src 'self'; connect-src 'self' https://*.workers.dev https://cloudflareinsights.com; media-src blob:; object-src 'none';">
   <title>OEIS Audio Sequencer</title>
   <link rel="stylesheet" href="styles.css">
-  <script src="https://cdn.jsdelivr.net/npm/lamejs@1.2.1/lame.min.js"
-          integrity="sha384-xuasJXVcyv3hZq0eYpelEkBC8l4yufatZXDsKuyCU2rqfhDCb+ftuE/mSfZAteiK"
-          crossorigin="anonymous"></script>
   <script src="app.js" defer></script>
+  <script defer src="https://static.cloudflareinsights.com/beacon.min.js"
+          data-cf-beacon='{"token": "YOUR_CF_ANALYTICS_TOKEN"}'></script>
 </head>
 <body>
 
 <header id="transport">
   <span id="app-title">OEIS Sequencer</span>
+  <button id="btn-about" type="button">About</button>
   <button id="btn-play" type="button">&#9654; Play</button>
   <button id="btn-stop" type="button" disabled>&#9632; Stop</button>
   <label><input type="checkbox" id="chk-loop" checked> Loop</label>
   <label>BPM <input type="number" id="inp-bpm" value="120" min="20" max="300" step="1"></label>
   <label>Bars <input type="number" id="inp-export-bars" value="8" min="1" max="64" step="1"></label>
   <button id="btn-export-wav" type="button">Export WAV</button>
-  <button id="btn-export-mp3" type="button">Export MP3</button>
   <span id="export-status"></span>
 </header>
 
-<main id="track-list"></main>
+<div id="layout">
+  <aside id="about-panel" class="hidden">
+    <div id="about-header">
+      <span>About</span>
+      <button id="btn-about-close" type="button">x</button>
+    </div>
+    <div id="about-body">
+      <h2>OEIS Audio Sequencer</h2>
+      <p>
+        Turn integer sequences from the
+        <a href="https://oeis.org" target="_blank" rel="noopener">On-Line Encyclopedia of Integer Sequences</a>
+        (OEIS) into layered, exportable music.
+      </p>
+      <p>
+        Each track fetches a sequence by its OEIS ID and maps the terms to
+        pitched notes. Three mapping modes are available:
+      </p>
+      <ul>
+        <li><strong>MIDI</strong> — values map directly to MIDI note numbers (mod 128).</li>
+        <li><strong>Diatonic</strong> — values step through a chosen scale and root, staying in key.</li>
+        <li><strong>Microtonal</strong> — successive term ratios drive continuous frequency shifts.</li>
+      </ul>
+      <p>
+        Stack as many tracks as you like, set BPM, mute or solo individual
+        tracks, and export the result as WAV.
+      </p>
+      <p>
+        Some sequences to try: <em>A000045</em> (Fibonacci), <em>A000040</em>
+        (primes), <em>A000217</em> (triangular numbers), <em>A001006</em>
+        (Motzkin numbers).
+      </p>
+      <hr>
+      <p>Released under the <strong>MIT License</strong>. Use it, fork it, remix it — attribution appreciated.</p>
+      <p>Credits: @saulpanders (saulpanders.github.io)
+    </div>
+  </aside>
 
-<button id="btn-add-track" type="button">+ Add Track</button>
+  <div id="main-content">
+    <main id="track-list"></main>
+    <button id="btn-add-track" type="button">+ Add Track</button>
+  </div>
+</div>
 
 <template id="track-template">
   <article class="track-card">
@@ -43,6 +81,7 @@
       <div class="control-group">
         <label>OEIS ID <input class="inp-oeis-id" type="text" placeholder="A000045" maxlength="8" spellcheck="false"></label>
         <button class="btn-fetch" type="button">Fetch</button>
+        <label>Terms <input class="inp-term-limit" type="number" min="1" max="9999" step="1"></label>
       </div>
       <div class="control-group">
         <label>Mode

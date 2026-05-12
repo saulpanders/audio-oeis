@@ -343,48 +343,27 @@ async function exportWAV(bars) {
   }
 }
 
-async function exportMP3(bars) {
-  if (typeof lamejs === 'undefined') {
-    setExportStatus('MP3 encoder not loaded');
-    return;
-  }
-  const totalSecs = bars * 4 * noteDuration();
-  setExportStatus('Encoding MP3...');
-  try {
-    const buf = await renderOffline(totalSecs);
-    const wavBytes = audioBufferToWav(buf);
-    const view = new DataView(wavBytes);
-    const numFrames = (wavBytes.byteLength - 44) / 4;
-    const left  = new Int16Array(numFrames);
-    const right = new Int16Array(numFrames);
-    for (let i = 0; i < numFrames; i++) {
-      left[i]  = view.getInt16(44 + i * 4, true);
-      right[i] = view.getInt16(44 + i * 4 + 2, true);
-    }
-    const encoder = new lamejs.Mp3Encoder(2, buf.sampleRate, 128);
-    const chunks = [];
-    const blockSize = 1152;
-    for (let i = 0; i < left.length; i += blockSize) {
-      const enc = encoder.encodeBuffer(left.subarray(i, i + blockSize), right.subarray(i, i + blockSize));
-      if (enc.length > 0) chunks.push(enc);
-    }
-    const tail = encoder.flush();
-    if (tail.length > 0) chunks.push(tail);
-    triggerDownload(new Blob(chunks, { type: 'audio/mp3' }), 'oeis-sequence.mp3');
-    setExportStatus('');
-  } catch (err) {
-    setExportStatus('Export failed: ' + err.message);
-  }
-}
 
 // --- Track UI ---
+
+function applyTermLimit(track, card) {
+  track.terms = track.termLimit != null
+    ? track.allTerms.slice(0, track.termLimit)
+    : track.allTerms.slice();
+  track.noteIndex = 0;
+  const n = track.terms.length;
+  const preview = track.terms.slice(0, 16).join(', ') + (n > 16 ? ', ...' : '');
+  card.querySelector('.lbl-terms').textContent = preview;
+}
 
 function createTrack() {
   const track = {
     id:          AppState.nextId++,
     oeisId:      '',
     name:        '',
+    allTerms:    [],
     terms:       [],
+    termLimit:   null,
     mappingMode: 'diatonic',
     rootNote:    60,
     scale:       SCALES.major,
@@ -437,6 +416,17 @@ function renderTrackCard(track) {
 
   card.querySelector('.btn-fetch').addEventListener('click', () => handleFetch(track, card));
 
+  card.querySelector('.inp-term-limit').addEventListener('change', e => {
+    const val = parseInt(e.target.value, 10);
+    track.termLimit = (isNaN(val) || val < 1) ? null : val;
+    if (track.allTerms.length > 0) {
+      applyTermLimit(track, card);
+      const statusEl = card.querySelector('.track-status');
+      statusEl.textContent = track.terms.length + ' / ' + track.allTerms.length + ' terms';
+      statusEl.className = 'track-status';
+    }
+  });
+
   card.querySelector('.sel-mode').addEventListener('change', e => {
     track.mappingMode = e.target.value;
     card.querySelector('.root-group').classList.toggle('hidden', track.mappingMode !== 'diatonic');
@@ -474,14 +464,24 @@ async function handleFetch(track, card) {
   statusEl.className = 'track-status';
   try {
     const result = await fetchOEIS(id);
-    track.oeisId = id;
-    track.terms  = result.terms;
-    track.name   = result.name;
+    track.oeisId   = id;
+    track.allTerms = result.terms;
+    track.name     = result.name;
     track.noteIndex = 0;
     card.querySelector('.track-title').textContent = id + ': ' + result.name;
-    const preview = result.terms.slice(0, 16).join(', ') + (result.terms.length > 16 ? ', ...' : '');
-    card.querySelector('.lbl-terms').textContent = preview;
-    statusEl.textContent = result.terms.length + ' terms loaded';
+
+    const limitInput = card.querySelector('.inp-term-limit');
+    const existingVal = parseInt(limitInput.value, 10);
+    if (isNaN(existingVal) || existingVal < 1) {
+      limitInput.value = result.terms.length;
+      track.termLimit = result.terms.length;
+    } else {
+      track.termLimit = Math.min(existingVal, result.terms.length);
+      limitInput.value = track.termLimit;
+    }
+
+    applyTermLimit(track, card);
+    statusEl.textContent = track.terms.length + ' terms loaded';
   } catch (err) {
     statusEl.textContent = err.message;
     statusEl.classList.add('error');
@@ -521,11 +521,15 @@ document.addEventListener('DOMContentLoaded', () => {
     exportWAV(parseInt(document.getElementById('inp-export-bars').value, 10) || 8);
   });
 
-  document.getElementById('btn-export-mp3').addEventListener('click', () => {
-    exportMP3(parseInt(document.getElementById('inp-export-bars').value, 10) || 8);
-  });
-
   document.getElementById('btn-add-track').addEventListener('click', createTrack);
+
+  const aboutPanel = document.getElementById('about-panel');
+  document.getElementById('btn-about').addEventListener('click', () => {
+    aboutPanel.classList.toggle('hidden');
+  });
+  document.getElementById('btn-about-close').addEventListener('click', () => {
+    aboutPanel.classList.add('hidden');
+  });
 
   updateTransportUI();
   const firstTrack = createTrack();

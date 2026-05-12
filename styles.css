@@ -1,4 +1,4 @@
-:root {
+/*:root {
   --bg: #111118;
   --surface: #1a1a28;
   --surface2: #22223a;
@@ -7,6 +7,17 @@
   --accent: #7c6cff;
   --border: #2a2a40;
   --error: #e05a5a;
+}*/
+/* using warm amber theme, I think its prettier*/
+:root {
+  --bg:       #16120e;               
+  --surface:  #1f1a14;           
+  --surface2: #2a231a;
+  --text:     #e8d8c0;             
+  --text-dim: #806a50;                    
+   --accent:   #d4804a;
+   --border:   #3a2e22;
+   --error:    #c05050;
 }
 
 *, *::before, *::after {
@@ -194,4 +205,95 @@ input[type="checkbox"] {
   display: block;
   margin: 4px 16px 24px;
   padding: 7px 14px;
+}
+
+/* --- sidebar layout --- */
+
+#layout {
+  display: flex;
+  align-items: flex-start;
+  min-height: calc(100vh - 40px);
+}
+
+#about-panel {
+  width: 260px;
+  flex-shrink: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+#about-panel.hidden {
+  display: none;
+}
+
+#about-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--border);
+  color: var(--accent);
+  font-weight: bold;
+  font-size: 11px;
+  letter-spacing: 0.05em;
+}
+
+#about-header button {
+  padding: 2px 6px;
+  font-size: 10px;
+}
+
+#about-body {
+  padding: 14px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--text-dim);
+  font-size: 11px;
+  line-height: 1.6;
+}
+
+#about-body h2 {
+  font-size: 12px;
+  color: var(--text);
+  font-weight: bold;
+  letter-spacing: 0.03em;
+}
+
+#about-body p,
+#about-body ul {
+  color: var(--text-dim);
+}
+
+#about-body ul {
+  padding-left: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+#about-body strong {
+  color: var(--text);
+}
+
+#about-body a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+#about-body a:hover {
+  text-decoration: underline;
+}
+
+#about-body hr {
+  border: none;
+  border-top: 1px solid var(--border);
+}
+
+#main-content {
+  flex: 1;
+  min-width: 0;
 }
