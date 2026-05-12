@@ -1,4 +1,3 @@
-//hosted on worker
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
@@ -21,9 +20,15 @@ export default {
 
     try {
       const resp = await fetchOEIS(id);
+      if (!resp.ok) {
+        return new Response(JSON.stringify({ error: 'OEIS returned ' + resp.status }), {
+          status: 502,
+          headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
+        });
+      }
       const body = await resp.text();
       return new Response(body, {
-        status: resp.status,
+        status: 200,
         headers: {
           'Content-Type': 'application/json',
           'Access-Control-Allow-Origin': '*',
