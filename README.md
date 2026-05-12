@@ -4,7 +4,9 @@ An in-browser DAW that turns integer sequences from the [OEIS](https://oeis.org)
 
 ## Quick Start
 
-Theres a live version available here:[audioeis.live](https://audioeis.live)
+Theres a live version available here:
+
+### [audioeis.live](https://audioeis.live)
 
 The live version is a direct mirror of this repo, so any changes pushed here should propagate up to production.
 
