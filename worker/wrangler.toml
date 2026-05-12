@@ -1,4 +1,4 @@
-name = "oeis-proxy"
+name = "audio-oeis-prod"
 main = "oeis-proxy.js"
 compatibility_date = "2024-09-02"
 
