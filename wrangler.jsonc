@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "audio-oeis-prod",
+  "name": "audio-oeis",
   "compatibility_date": "2026-05-12",
   "observability": {
     "enabled": true
