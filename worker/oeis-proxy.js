@@ -17,7 +17,7 @@ export default {
         headers: { 'Content-Type': 'application/json', 'Access-Control-Allow-Origin': '*' },
       });
     }
-
+//try getting sequence
     try {
       const resp = await fetchOEIS(id);
       if (!resp.ok) {
