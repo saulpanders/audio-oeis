@@ -2,7 +2,6 @@
 const WORKER_BASE = 'https://audio-oeis-prod.audioeis-live.workers.dev?id=';
 
 // On localhost, proxy.py serves /api/oeis so the browser never touches OEIS directly.
-// On file://, fetching is not possible — open via http://localhost:8080 instead.
 const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
 
 function proxyUrl(oeisId) {
