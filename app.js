@@ -1,5 +1,5 @@
 // Update this after deploying the Cloudflare Worker:
-const WORKER_BASE = 'https://audioeis-live.workers.dev?id=';
+const WORKER_BASE = 'https://audio-oeis-prod.audioeis-live.workers.dev/?id=';
 
 // On localhost, proxy.py serves /api/oeis so the browser never touches OEIS directly.
 const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);

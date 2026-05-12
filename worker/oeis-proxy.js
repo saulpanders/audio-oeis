@@ -1,3 +1,4 @@
+//hosted on worker
 export default {
   async fetch(request, env) {
     if (request.method === 'OPTIONS') {
