@@ -1,12 +1,5 @@
-// Update this after deploying the Cloudflare Worker:
-const WORKER_BASE = 'https://audio-oeis-prod.audioeis-live.workers.dev/?id=';
-
-// On localhost, proxy.py serves /api/oeis so the browser never touches OEIS directly.
-const IS_LOCAL = ['localhost', '127.0.0.1'].includes(window.location.hostname);
-
 function proxyUrl(oeisId) {
-  if (IS_LOCAL) return `/api/oeis?id=${oeisId}`;
-  return WORKER_BASE + oeisId;
+  return `/api/oeis?id=${oeisId}`;
 }
 
 // --- Constants ---
@@ -79,13 +72,9 @@ async function fetchOEIS(oeisId) {
     resp = await fetchWithTimeout(proxyUrl(id), 10000);
   } catch (err) {
     if (err.name === 'AbortError') throw new Error('Request timed out');
-    if (IS_LOCAL) throw new Error('Proxy unreachable — run: python proxy.py');
-    throw new Error('Network error: ' + (err.message || err));
+    throw new Error('Proxy unreachable — run: python3 proxy.py');
   }
   if (!resp.ok) {
-    if (resp.status === 404 && IS_LOCAL) {
-      throw new Error('Got 404 — use proxy.py, not python -m http.server');
-    }
     throw new Error('HTTP ' + resp.status);
   }
   const json = await resp.json();
