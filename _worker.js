@@ -1,4 +1,16 @@
-export async function onRequestGet({ request }) {
+export default {
+  async fetch(request, env) {
+    const { pathname } = new URL(request.url);
+
+    if (pathname === '/api/oeis') {
+      return handleOEIS(request);
+    }
+
+    return env.ASSETS.fetch(request);
+  },
+};
+
+async function handleOEIS(request) {
   const id = (new URL(request.url).searchParams.get('id') || '').trim().toUpperCase();
 
   if (!/^A\d{1,6}$/.test(id)) {
@@ -20,7 +32,6 @@ export async function onRequestGet({ request }) {
   }
 
   return new Response(await resp.text(), {
-    status: 200,
     headers: {
       'Content-Type': 'application/json',
       'Cache-Control': 'public, max-age=86400',

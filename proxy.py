@@ -68,7 +68,8 @@ class Handler(SimpleHTTPRequestHandler):
 
 
 if __name__ == '__main__':
+    import functools
     flag = ' (SSL verification disabled)' if NO_VERIFY else ''
     print(f'Listening on http://localhost:{PORT}{flag}')
     print('Open http://localhost:8080 in your browser')
-    HTTPServer(('localhost', PORT), Handler).serve_forever()
+    HTTPServer(('localhost', PORT), functools.partial(Handler, directory='public')).serve_forever()
