@@ -51,4 +51,4 @@ Some ideas to get started. Feel free to submit a PR with additional interesting 
 Set the **Bars** count in the transport bar, then click **Export WAV**. The export renders the full duration at 44.1 kHz stereo. For long exports (64 bars at slow BPM) rendering may take a few seconds. The WAV file generation is done entirely in client-side JavaScript, so there's no library dependencies!
 
 ## Reference
-[Theres a companion blog I wrote]() if you are interested in learning a bit more. A bit of a shameless plug. Enjoy!
+[Theres a companion blog I wrote](https://saulpanders.github.io/2026/05/15/OEIS-audio.html) if you are interested in learning a bit more. A bit of a shameless plug. Enjoy!
